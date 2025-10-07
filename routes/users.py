@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from models.users import UserRegistration, UserResponse, UserLogin
 from utils.security import hash_password, verify_password
 from utils.jwt_handler import access_token, verify_token
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from bson import ObjectId
 
 client = AsyncIOMotorClient("mongodb://localhost:27017")
@@ -12,9 +12,9 @@ db = client["doc_management"]
 user_collection = db["users"]
 
 router = APIRouter(prefix="/users", tags=["Users"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/auth/login")
+bearer_scheme = HTTPBearer()
 
-async def current_user(token: str = Depends(oauth2_scheme)):
+async def current_user(token: str = Depends(bearer_scheme)):
     payload = verify_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Token invalid or expired")
